@@ -147,6 +147,8 @@
 #include <wtf/text/CString.h>
 #include <wtf/text/TextStream.h>
 
+#include <iostream>
+
 namespace WebCore {
 
 WTF_MAKE_ISO_ALLOCATED_IMPL(Element);
@@ -4449,16 +4451,19 @@ IntersectionObserverData* Element::intersectionObserverDataIfExists()
 
 ElementAnimationRareData* Element::animationRareData(PseudoId pseudoId) const
 {
+    std::cerr << "[kingwei]Element::animationRareData" << " element: " << this << " pseudoId: " << static_cast<uint16_t>(pseudoId) << std::endl;
     return hasRareData() ? elementRareData()->animationRareData(pseudoId) : nullptr;
 }
 
 ElementAnimationRareData& Element::ensureAnimationRareData(PseudoId pseudoId)
 {
+    std::cerr << "[kingwei]Element::ensureAnimationRareData" << " element: " << this << " pseudoId: " << static_cast<uint16_t>(pseudoId) << std::endl;
     return ensureElementRareData().ensureAnimationRareData(pseudoId);
 }
 
 KeyframeEffectStack* Element::keyframeEffectStack(PseudoId pseudoId) const
 {
+    std::cerr << "[kingwei]Element::keyframeEffectStack" << " element: " << this << " pseudoId: " << static_cast<uint16_t>(pseudoId) << std::endl;
     if (auto* animationData = animationRareData(pseudoId))
         return animationData->keyframeEffectStack();
     return nullptr;
@@ -4466,11 +4471,13 @@ KeyframeEffectStack* Element::keyframeEffectStack(PseudoId pseudoId) const
 
 KeyframeEffectStack& Element::ensureKeyframeEffectStack(PseudoId pseudoId)
 {
+    std::cerr << "[kingwei]Element::ensureKeyframeEffectStack" << " element: " << this << " pseudoId: " << static_cast<uint16_t>(pseudoId) << std::endl;
     return ensureAnimationRareData(pseudoId).ensureKeyframeEffectStack();
 }
 
 bool Element::hasKeyframeEffects(PseudoId pseudoId) const
 {
+    std::cerr << "[kingwei]Element::hasKeyframeEffects" << " element: " << this << " pseudoId: " << static_cast<uint16_t>(pseudoId) << std::endl;
     if (auto* animationData = animationRareData(pseudoId)) {
         if (auto* keyframeEffectStack = animationData->keyframeEffectStack())
             return keyframeEffectStack->hasEffects();
@@ -4518,6 +4525,7 @@ CSSAnimationCollection& Element::animationsCreatedByMarkup(PseudoId pseudoId)
 
 void Element::setAnimationsCreatedByMarkup(PseudoId pseudoId, CSSAnimationCollection&& animations)
 {
+    std::cerr << "[kingwei] Element::setAnimationsCreatedByMarkup"  << " element: " << this << " pseudoId: " << static_cast<uint16_t>(pseudoId) << std::endl;
     if (animations.isEmpty() && !animationRareData(pseudoId))
         return;
     ensureAnimationRareData(pseudoId).setAnimationsCreatedByMarkup(WTFMove(animations));

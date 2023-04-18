@@ -138,6 +138,7 @@ namespace WebCore {
     M(Worker) \
     M(XR) \
     M(WheelEventTestMonitor) \
+    M(KingWei) \
 
 #undef DECLARE_LOG_CHANNEL
 #define DECLARE_LOG_CHANNEL(name) \

@@ -33,7 +33,7 @@
 
 NSString * const kUserAgentChangedNotificationName = @"UserAgentChangedNotification";
 
-static NSString * const defaultURL = @"http://www.webkit.org/";
+static NSString * const defaultURL = @"http://127.0.0.1:8080/animation/1.html";
 static NSString * const DefaultURLPreferenceKey = @"DefaultURL";
 
 static NSString * const CustomUserAgentPreferenceKey = @"CustomUserAgentIdentifier";

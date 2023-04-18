@@ -71,6 +71,9 @@
 #include <wtf/IsoMallocInlines.h>
 #include <wtf/UUID.h>
 #include <wtf/text/TextStream.h>
+#include "Logging.h"
+
+#include <iostream>
 
 #if ENABLE(THREADED_ANIMATION_RESOLUTION)
 #include "AcceleratedTimeline.h"
@@ -140,6 +143,8 @@ static inline CSSPropertyID IDLAttributeNameToAnimationPropertyName(const AtomSt
 
 static inline void computeMissingKeyframeOffsets(Vector<KeyframeEffect::ParsedKeyframe>& keyframes)
 {
+    std::cerr << "[kingwei]computeMissingKeyframeOffsets" << std::endl;
+    LOG(KingWei, "[kingwei]computeMissingKeyframeOffsets");
     // https://drafts.csswg.org/web-animations-1/#compute-missing-keyframe-offsets
 
     if (keyframes.isEmpty())
@@ -898,6 +903,7 @@ ExceptionOr<void> KeyframeEffect::processKeyframes(JSGlobalObject& lexicalGlobal
 
 void KeyframeEffect::updateBlendingKeyframes(RenderStyle& elementStyle, const Style::ResolutionContext& resolutionContext)
 {
+    // std::cerr << "[kingwei]KeyframeEffect::updateBlendingKeyframes" << std::endl;
     if (!m_blendingKeyframes.isEmpty() || !m_target)
         return;
 
@@ -1000,6 +1006,7 @@ void KeyframeEffect::clearBlendingKeyframes()
 
 void KeyframeEffect::setBlendingKeyframes(KeyframeList&& blendingKeyframes)
 {
+    std::cerr << "[kingwei]KeyframeEffect::setBlendingKeyframes" << std::endl;
     CanBeAcceleratedMutationScope mutationScope(this);
 
     m_blendingKeyframes = WTFMove(blendingKeyframes);
@@ -1068,6 +1075,7 @@ void KeyframeEffect::computeDeclarativeAnimationBlendingKeyframes(const RenderSt
 
 void KeyframeEffect::computeCSSAnimationBlendingKeyframes(const RenderStyle& unanimatedStyle, const Style::ResolutionContext& resolutionContext)
 {
+    std::cerr << "[kingwei]KeyframeEffect::computeCSSAnimationBlendingKeyframes" << std::endl;
     ASSERT(is<CSSAnimation>(animation()));
     ASSERT(document());
 
@@ -1469,6 +1477,7 @@ void KeyframeEffect::getAnimatedStyle(std::unique_ptr<RenderStyle>& animatedStyl
 
 void KeyframeEffect::setAnimatedPropertiesInStyle(RenderStyle& targetStyle, double iterationProgress,  double currentIteration)
 {
+    std::cerr << "[kingwei]KeyframeEffect::setAnimatedPropertiesInStyle" << " iterationProgress: " << iterationProgress << " currentIteration: " << currentIteration << std::endl;
     auto& properties = m_blendingKeyframes.properties();
 
     // In the case of CSS Transitions we already know that there are only two keyframes, one where offset=0 and one where offset=1,
@@ -1494,6 +1503,7 @@ void KeyframeEffect::setAnimatedPropertiesInStyle(RenderStyle& targetStyle, doub
     KeyframeValue propertySpecificKeyframeWithOneOffset(1, RenderStyle::clonePtr(targetStyle));
 
     auto blendProperty = [&](AnimatableProperty property) {
+        std::cerr << "[kingwei]blendProperty" << std::endl;
         // 1. If iteration progress is unresolved abort this procedure.
         // 2. Let target property be the longhand property for which the effect value is to be calculated.
         // 3. If animation type of the target property is not animatable abort this procedure since the effect cannot be applied.
@@ -1646,14 +1656,22 @@ void KeyframeEffect::setAnimatedPropertiesInStyle(RenderStyle& targetStyle, doub
         // 16. Let interval distance be the result of evaluating (iteration progress - start offset) / (end offset - start offset).
         auto intervalDistance = (iterationProgress - startOffset) / (endOffset - startOffset);
 
+        std::cerr << "[kingwei]blendProperty intervalDistance: " << intervalDistance << std::endl;
+
         // 17. Let transformed distance be the result of evaluating the timing function associated with the first keyframe in interval endpoints
         //     passing interval distance as the input progress.
         auto transformedDistance = intervalDistance;
+        std::cerr << "[kingwei]blendProperty transformedDistance: " << transformedDistance << std::endl;
         if (auto duration = iterationDuration()) {
             auto rangeDuration = (endOffset - startOffset) * duration.seconds();
-            if (auto* timingFunction = timingFunctionForBlendingKeyframe(startKeyframe))
+            std::cerr << "[kingwei]blendProperty duration: " << duration.seconds() << " rangeDuration: " << rangeDuration << std::endl;
+            if (auto* timingFunction = timingFunctionForBlendingKeyframe(startKeyframe)) {
+
                 transformedDistance = timingFunction->transformProgress(intervalDistance, rangeDuration);
+                std::cerr << "[kingwei]blendProperty transformProgress transformedDistance: " << transformedDistance << std::endl;
+            }
         }
+
 
         // 18. Return the result of applying the interpolation procedure defined by the animation type of the target property, to the values of the target
         //     property specified on the two keyframes in interval endpoints taking the first such value as Vstart and the second as Vend and using transformed
@@ -1663,8 +1681,10 @@ void KeyframeEffect::setAnimatedPropertiesInStyle(RenderStyle& targetStyle, doub
         CSSPropertyAnimation::blendProperty(*this, property, targetStyle, startKeyframeStyle, endKeyframeStyle, transformedDistance, CompositeOperation::Replace, iterationCompositeOperation, currentIteration);
     };
 
-    for (auto property : properties)
+    for (auto property : properties) {
         blendProperty(property);
+    }
+
 
     // In case one of the animated properties has its value set to "inherit" in one of the keyframes,
     // let's mark the resulting animated style as having an explicitly inherited property such that

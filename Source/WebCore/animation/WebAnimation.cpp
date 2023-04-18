@@ -60,6 +60,8 @@
 #include <wtf/text/TextStream.h>
 #include <wtf/text/WTFString.h>
 
+#include <iostream>
+
 namespace WebCore {
 
 WTF_MAKE_ISO_ALLOCATED_IMPL(WebAnimation);
@@ -72,6 +74,7 @@ HashSet<WebAnimation*>& WebAnimation::instances()
 
 Ref<WebAnimation> WebAnimation::create(Document& document, AnimationEffect* effect)
 {
+    std::cerr << "[kingwei]WebAnimation::create" << std::endl;
     auto result = adoptRef(*new WebAnimation(document));
     result->initialize();
     result->setEffect(effect);
@@ -84,6 +87,7 @@ Ref<WebAnimation> WebAnimation::create(Document& document, AnimationEffect* effe
 
 Ref<WebAnimation> WebAnimation::create(Document& document, AnimationEffect* effect, AnimationTimeline* timeline)
 {
+    std::cerr << "[kingwei]WebAnimation::create" << std::endl;
     auto result = adoptRef(*new WebAnimation(document));
     result->initialize();
     result->setEffect(effect);
@@ -167,6 +171,7 @@ void WebAnimation::setBindingsEffect(RefPtr<AnimationEffect>&& newEffect)
 
 void WebAnimation::setEffect(RefPtr<AnimationEffect>&& newEffect)
 {
+    std::cerr << "[kingwei]WebAnimation::setEffect" << std::endl;
     // 3.4.3. Setting the target effect of an animation
     // https://drafts.csswg.org/web-animations-1/#setting-the-target-effect
 
@@ -1031,11 +1036,13 @@ void WebAnimation::finishNotificationSteps()
 
 ExceptionOr<void> WebAnimation::play()
 {
+    std::cerr << "[kingwei]WebAnimation::play()" << std::endl;
     return play(AutoRewind::Yes);
 }
 
 ExceptionOr<void> WebAnimation::play(AutoRewind autoRewind)
 {
+    std::cerr << "[kingwei]WebAnimation::play autoRewind:" << std::endl;
     LOG_WITH_STREAM(Animations, stream << "WebAnimation " << this << " play(autoRewind " << (autoRewind == AutoRewind::Yes) << ") (current time is " << currentTime() << ")");
 
     // 3.4.10. Playing an animation
